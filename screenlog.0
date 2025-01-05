@@ -1,0 +1,53 @@
+smsgw[J[J_gw --help
+/bin/ash: sms_gw: not found
+root@OpenWrt:~# s[Jls[J[Jsms_gw
+/bin/ash: sms_gw: not found
+root@OpenWrt:~# opkg info sms_gw
+Package: sms_gw
+Version: 1
+Depends: libc, libuci, libpthread, libstdcpp
+Status: install user installed
+Architecture: ramips_24kec
+Installed-Time: 1574817955
+
+root@OpenWrt:~# 
+root@OpenWrt:~# cat $(which sms_gw)
+
+
+^C
+root@OpenWrt:~# 
+root@OpenWrt:~# 
+root@OpenWrt:~# root@OpenWrt:~# cat $(which sms_gw)[J
+
+
+^C
+root@OpenWrt:~# 
+root@OpenWrt:~# 
+root@OpenWrt:~# sms_gw
+/bin/ash: sms_gw: not found
+root@OpenWrt:~# 
+root@OpenWrt:~# 
+root@OpenWrt:~# opkg info sms_gw
+Package: sms_gw
+Version: 1
+Depends: libc, libuci, libpthread, libstdcpp
+Status: install user installed
+Architecture: ramips_24kec
+Installed-Time: 1574817955
+
+root@OpenWrt:~# opkg files sms_gw
+Package sms_gw (1) is installed on root and has the following files:
+/usr/sbin/application_boot.sh
+/home/smswg
+/etc/init.d/smsstart
+/home/sms-start
+root@OpenWrt:~# 
+root@OpenWrt:~# opkg files sms_gw
+Package sms_gw (1) is installed on root and has the following files:
+/usr/sbin/application_boot.sh
+/home/smswg
+/etc/init.d/smsstart
+/home/sms-start
+root@OpenWrt:~# 
+root@OpenWrt:~# 
+root@OpenWrt:~# 

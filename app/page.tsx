@@ -18,7 +18,7 @@ export default function Home() {
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full max-w-4xl">
           <div className="p-6 rounded-xl bg-white dark:bg-black/20 border border-black/[.08] dark:border-white/[.08] shadow-lg">
-            <h2 className="text-xl font-semibold mb-4">Create your A1 Agent</h2>
+            <h2 className="text-xl font-semibold mb-4">Create your A1Base Account</h2>
             <div className="flex flex-col gap-3">
               <p className="text-sm text-gray-600 dark:text-gray-300">
                 Build your own AI agent in minutes:
@@ -60,14 +60,15 @@ export default function Home() {
           <div className="p-6 rounded-xl bg-white dark:bg-black/20 border border-black/[.08] dark:border-white/[.08] shadow-lg">
             <h2 className="text-xl font-semibold mb-4">Getting Started</h2>
             <ol className="list-inside list-decimal text-sm space-y-3 font-[family-name:var(--font-geist-mono)]">
+              <li>Update your env variables</li>
               <li>
                 Get started by editing{" "}
                 <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-                  app/page.tsx
+                  lib/chat-config.ts
                 </code>
                 .
               </li>
-              <li>Save and see your changes instantly.</li>
+              <li>Update your webhook URL in the A1Base dashboard. Use Ngrok to test locally.</li>
             </ol>
           </div>
         </div>
