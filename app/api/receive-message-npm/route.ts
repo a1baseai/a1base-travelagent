@@ -1,8 +1,16 @@
 import { NextResponse } from "next/server";
 import { WhatsAppRequestBody } from "@/types/chat";
+import { A1BaseAPI } from 'a1base-node';
 import { AGENT_NUMBER } from "@/lib/chat-config";
 import { generateAgentResponse } from "@/lib/openai-service";
-import { sendWhatsAppMessage } from "@/lib/whatsapp-service";
+
+// Initialize A1Base client
+const credentials = {
+  apiKey: process.env.A1BASE_API_KEY!,
+  apiSecret: process.env.A1BASE_API_SECRET!,
+};
+const baseURL = 'https://api.a1base.com/v1/messages';
+const client = new A1BaseAPI(credentials, baseURL);
 
 // In-memory storage (Note: This will reset on server restart)
 const messagesByThread = new Map();
@@ -11,7 +19,7 @@ function saveMessage(threadId: string, message: any) {
   const threadMessages = messagesByThread.get(threadId) || [];
   threadMessages.push(message);
   messagesByThread.set(threadId, threadMessages);
-} 
+}
 
 export async function POST(request: Request) {
   try {
@@ -61,13 +69,27 @@ export async function POST(request: Request) {
         const aiResponse = await generateAgentResponse(threadMessages);
         console.log("[AI Response]", aiResponse);
 
-        await sendWhatsAppMessage(sender_number, aiResponse);
+        // Send message using A1Base client
+        const messageData = {
+          content: aiResponse,
+          from: AGENT_NUMBER,
+          to: sender_number,
+          service: 'whatsapp'
+        };
+
+        await client.sendIndividualMessage(process.env.A1BASE_ACCOUNT_ID!, messageData);
       } catch (error) {
         console.error("[Chat] Error:", error);
-        await sendWhatsAppMessage(
-          sender_number,
-          "Sorry, I encountered an error processing your message"
-        );
+        
+        // Send error message using A1Base client
+        const errorMessageData = {
+          content: "Sorry, I encountered an error processing your message",
+          from: AGENT_NUMBER,
+          to: sender_number,
+          service: 'whatsapp'
+        };
+        
+        await client.sendIndividualMessage(process.env.A1BASE_ACCOUNT_ID!, errorMessageData);
       }
     }
 
@@ -79,4 +101,4 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-}
+} 
