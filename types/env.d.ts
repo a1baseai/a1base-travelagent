@@ -7,4 +7,4 @@ declare namespace NodeJS {
     A1BASE_AGENT_NUMBER: string
     A1BASE_AGENT_NAME: string
   }
-} 
+}

@@ -49,9 +49,11 @@ A professional, production-ready template for building AI-powered chat agents us
    
    Update `.env.local` with your credentials:
    ```env
-   A1BASE_API_KEY=your_api_key          # From A1Base Dashboard
-   A1BASE_API_SECRET=your_api_secret    # From A1Base Dashboard
-   A1BASE_ACCOUNT_ID=your_account_id    # From A1Base Dashboard
+   A1BASE_API_KEY=your_api_key            # From A1Base Dashboard
+   A1BASE_API_SECRET=your_api_secret      # From A1Base Dashboard
+   A1BASE_ACCOUNT_ID=your_account_id      # From A1Base Dashboard
+   A1BASE_AGENT_NUMBER=your_agent_number  # From A1Base Dashboard
+   A1BASE_AGENT_NAME=your_agent_name      # From A1Base Dashboard
    OPENAI_API_KEY=your_openai_key      # From OpenAI Dashboard
    ```
 
@@ -79,7 +81,7 @@ Your agent will be available at `http://localhost:3000`
 
 2. **Configure A1Base Webhook**
    - Navigate to Settings > Webhooks in A1Base Dashboard
-   - Set Webhook URL: `https://your-ngrok-url/api/receive-message-npm`
+   - Set Webhook URL: `https://your-ngrok-url/api/whatsapp/incoming`
    - Save configuration
 
 3. **Verify Setup**
@@ -94,12 +96,14 @@ Your agent will be available at `http://localhost:3000`
 | `A1BASE_API_KEY` | API Authentication | A1Base Dashboard > Settings > API Keys |
 | `A1BASE_API_SECRET` | API Security | A1Base Dashboard > Settings > API Keys |
 | `A1BASE_ACCOUNT_ID` | Account Identification | A1Base Dashboard > Overview |
+| `A1BASE_AGENT_NUMBER` | Agent Number | A1Base Dashboard > Overview |
+| `A1BASE_AGENT_NAME` | Agent Name | A1Base Dashboard > Overview |
 | `OPENAI_API_KEY` | AI Integration | [OpenAI Dashboard](https://platform.openai.com/api-keys) |
 
 ## 🛠️ Customization
 
-- **AI Response Logic**: Modify `lib/openai-service.ts`
-- **Message Handling**: Update `app/api/receive-message-npm/route.ts`
+- **AI Response Logic**: Modify `lib/agent/prompt.ts` and `lib/services/openai.ts`
+- **Message Handling**: Update `lib/agent/handle-whatsapp-incoming.ts`
 - **Interface**: Customize `app/page.tsx`
 
 ## 👥 Contributing
