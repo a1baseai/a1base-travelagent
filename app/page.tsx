@@ -64,7 +64,7 @@ export default function Home() {
               <li>
                 Get started by editing{" "}
                 <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-                  lib/chat-config.ts
+                  lib/agent/prompts.ts
                 </code>
                 .
               </li>

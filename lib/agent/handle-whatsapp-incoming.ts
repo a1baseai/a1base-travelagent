@@ -1,5 +1,4 @@
-import type { WhatsAppRequestBody } from "@/types/chat";
-import { A1BaseAPI } from 'a1base-node';
+import { A1BaseAPI, WhatsAppIncomingData } from 'a1base-node';
 import { generateAgentResponse } from "../services/openai";
 
 // Initialize A1Base client
@@ -32,14 +31,16 @@ export async function handleWhatsAppIncoming({
   content,
   sender_name,
   sender_number,
+  thread_type,
   timestamp,
-}: WhatsAppRequestBody) {
+}: WhatsAppIncomingData) {
   console.log("[Message Received]", {
     thread_id,
     message_id,
     content,
     sender_number,
     sender_name,
+    thread_type,
     timestamp,
   });
 
@@ -53,35 +54,57 @@ export async function handleWhatsAppIncoming({
   });
 
   // Only respond to user messages
-  if (sender_number !== process.env.A1BASE_AGENT_NUMBER!) {
-    try {
-      const threadMessages = messagesByThread.get(thread_id) || [];
-      console.log("[Thread Messages]", threadMessages);
+  if (sender_number === process.env.A1BASE_AGENT_NUMBER!) {
+    return;
+  }
 
-      const aiResponse = await generateAgentResponse(threadMessages);
-      console.log("[AI Response]", aiResponse);
+  try {
+    const threadMessages = messagesByThread.get(thread_id) || [];
+    console.log("[Thread Messages]", threadMessages);
 
-      // Send message using A1Base client
-      const messageData = {
-        content: aiResponse,
-        from: process.env.A1BASE_AGENT_NUMBER!,
+    const aiResponse = await generateAgentResponse(threadMessages);
+    console.log("[AI Response]", aiResponse);
+
+    // Shared message data
+    const messageData = {
+      content: aiResponse,
+      from: process.env.A1BASE_AGENT_NUMBER!,
+      service: 'whatsapp',
+    };
+
+    // Send message using A1Base client
+    if (thread_type === "group") {
+      await client.sendGroupMessage(process.env.A1BASE_ACCOUNT_ID!, {
+        ...messageData,
+        thread_id: thread_id,
+      });
+    } else {
+      await client.sendIndividualMessage(process.env.A1BASE_ACCOUNT_ID!, {
+        ...messageData,
         to: sender_number,
-        service: 'whatsapp'
-      };
+      });
+    }
+  } catch (error) {
+    console.error("[Chat] Error:", error);
 
-      await client.sendIndividualMessage(process.env.A1BASE_ACCOUNT_ID!, messageData);
-    } catch (error) {
-      console.error("[Chat] Error:", error);
-      
-      // Send error message using A1Base client
-      const errorMessageData = {
-        content: "Sorry, I encountered an error processing your message",
-        from: process.env.A1BASE_AGENT_NUMBER!,
+    // Shared error message data
+    const errorMessageData = {
+      content: "Sorry, I encountered an error processing your message",
+      from: process.env.A1BASE_AGENT_NUMBER!,
+      service: 'whatsapp',
+    };
+
+    // Send error message using A1Base client
+    if (thread_type === "group") {
+      await client.sendGroupMessage(process.env.A1BASE_ACCOUNT_ID!, {
+        ...errorMessageData,
+        thread_id: thread_id,
+      });
+    } else {
+      await client.sendIndividualMessage(process.env.A1BASE_ACCOUNT_ID!, {
+        ...errorMessageData,
         to: sender_number,
-        service: 'whatsapp'
-      };
-      
-      await client.sendIndividualMessage(process.env.A1BASE_ACCOUNT_ID!, errorMessageData);
+      });
     }
   }
 }
