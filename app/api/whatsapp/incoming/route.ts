@@ -10,18 +10,12 @@ export async function POST(request: Request) {
     const body = await request.json() as WhatsAppIncomingData;
     console.log("[Parsed Request Body]", body);
 
-    // Patch bug where sender_number is not prefixed with +
-    let sender_number = "+" + body.sender_number;
-
     // Patch bug where group message sender number is missing if sender is a1base agent
-    if (body.thread_type === "group" && sender_number === "+") {
-      sender_number = process.env.A1BASE_AGENT_NUMBER!;
+    if (body.thread_type === "group" && body.sender_number === "+") {
+      body.sender_number = process.env.A1BASE_AGENT_NUMBER!;
     }
 
-    await handleWhatsAppIncoming({
-      ...body,
-      sender_number,
-    });
+    await handleWhatsAppIncoming(body);
 
     return NextResponse.json({ success: true });
   } catch (error) {
