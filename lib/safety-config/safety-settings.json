@@ -1,0 +1,36 @@
+{
+  "profanityFilter": {
+    "allowProfanity": false
+  },
+  "dataSensitivity": {
+    "handleCustomerData": "doNotStore",
+    "piiHandling": "doNotCollect"
+  },
+  "languageGuidelines": {
+    "avoidSlang": true
+  },
+  "responsePolicies": {
+    "avoidDisallowedContent": true,
+    "disallowedContentCategories": [
+      "profanity",
+      "hateSpeech",
+      "harassment",
+      "politics",
+      "religion",
+      "sexuality",
+      "violence",
+      "suicide",
+      "selfHarm",
+      "discrimination",
+      "personalData"
+    ]
+  },
+  "privacy": {
+    "anonymizeUserData": true,
+    "logSensitiveData": false
+  },
+  "compliance": {
+    "gdpr": true,
+    "ccpa": true
+  }
+}
