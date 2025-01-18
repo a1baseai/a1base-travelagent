@@ -1,13 +1,17 @@
-import { handleWhatsAppIncoming } from "@/lib/agent/handle-whatsapp-incoming";
+import { handleWhatsAppIncoming } from "@/lib/ai-triage/handle-incoming";
 import { WhatsAppIncomingData } from "a1base-node";
 import { NextResponse } from "next/server";
+
+interface ExtendedWhatsAppIncoming extends WhatsAppIncomingData {
+  thread_type?: string;
+}
 
 export async function POST(request: Request) {
   try {
     console.log("[Request Headers]", Object.fromEntries(request.headers));
     console.log("[Request Method]", request.method);
 
-    const body = await request.json() as WhatsAppIncomingData;
+    const body = (await request.json()) as ExtendedWhatsAppIncoming;
     console.log("[Parsed Request Body]", body);
 
     // Patch bug where group message sender number is missing if sender is a1base agent
