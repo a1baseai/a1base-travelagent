@@ -32,5 +32,10 @@
   "compliance": {
     "gdpr": true,
     "ccpa": true
+  },
+  "customSafetyPrompts": {
+    "dontMakeUpInformation": "You should not make up information.",
+    "doubleCheckYourWork": "You should double check your work before responding.",
+    "dontKnowResponse": "If you don't know the answer, say you don't know and respond honestly."
   }
 }

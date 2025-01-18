@@ -1,31 +1,27 @@
-import { A1BaseAPI, WhatsAppIncomingData } from 'a1base-node';
 import { generateAgentResponse } from "../services/openai";
+import { A1BaseAPI } from "a1base-node";
 
-// Initialize A1Base client
-const credentials = {
-  apiKey: process.env.A1BASE_API_KEY!,
-  apiSecret: process.env.A1BASE_API_SECRET!,
-};
-const client = new A1BaseAPI({
-  credentials
-});
-
-// In-memory storage (Note: This will reset on server restart)
-const messagesByThread = new Map();
-
-function saveMessage(threadId: string, message: {
+type MessageRecord = {
   message_id: string;
   content: string;
   sender_number: string;
   sender_name: string;
   timestamp: string;
-}) {
-  const threadMessages = messagesByThread.get(threadId) || [];
-  threadMessages.push(message);
-  messagesByThread.set(threadId, threadMessages);
-}
+};
 
-export async function handleWhatsAppIncoming({
+type TriageParams = {
+  thread_id: string;
+  message_id: string;
+  content: string;
+  sender_name: string;
+  sender_number: string;
+  thread_type: string;
+  timestamp: string;
+  client: A1BaseAPI;
+  messagesByThread: Map<string, MessageRecord[]>;
+};
+
+export async function triageMessage({
   thread_id,
   message_id,
   content,
@@ -33,31 +29,9 @@ export async function handleWhatsAppIncoming({
   sender_number,
   thread_type,
   timestamp,
-}: WhatsAppIncomingData) {
-  console.log("[Message Received]", {
-    thread_id,
-    message_id,
-    content,
-    sender_number,
-    sender_name,
-    thread_type,
-    timestamp,
-  });
-
-  // Store message
-  saveMessage(thread_id, {
-    message_id,
-    content,
-    sender_number,
-    sender_name,
-    timestamp,
-  });
-
-  // Only respond to user messages
-  if (sender_number === process.env.A1BASE_AGENT_NUMBER!) {
-    return;
-  }
-
+  client,
+  messagesByThread,
+}: TriageParams) {
   try {
     const threadMessages = messagesByThread.get(thread_id) || [];
     console.log("[Thread Messages]", threadMessages);
@@ -69,7 +43,7 @@ export async function handleWhatsAppIncoming({
     const messageData = {
       content: aiResponse,
       from: process.env.A1BASE_AGENT_NUMBER!,
-      service: 'whatsapp',
+      service: "whatsapp",
     };
 
     // Send message using A1Base client
@@ -91,10 +65,10 @@ export async function handleWhatsAppIncoming({
     const errorMessageData = {
       content: "Sorry, I encountered an error processing your message",
       from: process.env.A1BASE_AGENT_NUMBER!,
-      service: 'whatsapp',
+      service: "whatsapp",
     };
 
-    // Send error message using A1Base client
+    // Send error message
     if (thread_type === "group") {
       await client.sendGroupMessage(process.env.A1BASE_ACCOUNT_ID!, {
         ...errorMessageData,
