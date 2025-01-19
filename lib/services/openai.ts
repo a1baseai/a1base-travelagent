@@ -10,11 +10,11 @@ const openai = new OpenAI({
 /**
  * Triage the message intent using OpenAI.
  * This function returns one of the following responseTypes:
- *  - generateEmail
+ *  - handleEmailAction
  *  - followUpResponse
  *  - simpleResponse
  */
-export async function triageMessageIntent(threadMessages: ThreadMessage[]): Promise<{ responseType: "generateEmail" | "followUpResponse" | "simpleResponse" }> {
+export async function triageMessageIntent(threadMessages: ThreadMessage[]): Promise<{ responseType: "handleEmailAction" | "followUpResponse" | "simpleResponse" }> {
   // Combine user messages as conversation context
   const conversationContext = threadMessages.map((msg) => ({
     role: msg.sender_number === process.env.A1BASE_AGENT_NUMBER! ? "assistant" as const : "user" as const,
@@ -25,12 +25,12 @@ export async function triageMessageIntent(threadMessages: ThreadMessage[]): Prom
   // Create a triage prompt that instructs the model to respond with JSON only
   const triagePrompt = `
 Based on the conversation, analyze the user's intent and respond with exactly one of these three JSON responses:
-{"responseType":"generateEmail"}
+{"responseType":"handleEmailAction"}
 {"responseType":"followUpResponse"}
 {"responseType":"simpleResponse"}
 
 Rules:
-- If the user specifically requests an email or includes an email address, select "generateEmail".
+- If the user specifically requests an email or includes an email address, select "handleEmailAction".
 - If the user asks a question or follow-up inquiry that doesn't necessarily request an email, select "followUpResponse".
 - Otherwise, select "simpleResponse".
 
@@ -51,7 +51,7 @@ Return valid JSON with only that single key "responseType" and value as one of t
   try {
     const parsed = JSON.parse(content)
     if (
-      parsed.responseType === "generateEmail" ||
+      parsed.responseType === "handleEmailAction" ||
       parsed.responseType === "followUpResponse" ||
       parsed.responseType === "simpleResponse"
     ) {

@@ -1,6 +1,6 @@
 import { generateAgentResponse } from "../services/openai";
 import { ThreadMessage } from "@/types/chat";
-import { DefaultReplyToMessage, SendEmailFromAgent } from "../workflows/basic_workflow";
+import { DefaultReplyToMessage, SendEmailFromAgent, ConfirmTaskCompletion, ConstructEmail, waitForUserApproval } from "../workflows/basic_workflow";
 import { triageMessageIntent } from "../services/openai";
 
 type MessageRecord = {
@@ -52,11 +52,25 @@ export async function triageMessage({
     
     // Based on the triage result, choose the appropriate workflow
     switch (triage.responseType) {
-      case 'generateEmail':
+      case 'handleEmailAction':
         console.log('Running Generate Email')
         // Triage to send an email using the agent's email address
-        // TODO: case where an email isn't mentioned in the message
-        await SendEmailFromAgent(threadMessages)
+        
+        // Confirm email contents with user or ask for follow up
+        const emailDraft = await ConstructEmail(threadMessages)
+
+        // await waitForUserApproval(threadMessages, emailDraft)
+        
+        // await SendEmailFromAgent(threadMessages)
+
+        // Send confirmation message back to user
+        await ConfirmTaskCompletion(
+          messages,
+          thread_type as "individual" | "group", 
+          thread_id,
+          sender_number
+        );
+        break;
         
       case 'followUpResponse':
         console.log('Running Follow Up Response')
