@@ -5,6 +5,7 @@
 */
 
 import safetySettings from "../safety-config/safety-settings.json";
+import agentProfileSettings from "../agent-profile/agent-profile-settings.json";
 
 function getSafetyPrompt(settings: typeof safetySettings): string {
   // Create a readable list of any custom safety prompts
@@ -54,7 +55,26 @@ Please ensure you strictly follow these safety guidelines in every response.
 `;
 }
 
+// Add a helper function to process agentProfileSettings and return a snippet
+function getAgentProfileSnippet(profile: typeof agentProfileSettings): string {
+  const { name, companyName, botPurpose, languageStyle } = profile;
+  const tone = languageStyle?.tone?.join(" ");
+  return `
+[AGENT PROFILE]
+
+Name: ${name}
+Company: ${companyName}
+Purpose: ${botPurpose?.join(" ")}
+Language: ${languageStyle?.language} (${languageStyle?.dialect})
+Tone: ${tone}
+
+[/AGENT PROFILE]
+`;
+}
+
 export const getSystemPrompt = (userName: string) => `
+${getAgentProfileSnippet(agentProfileSettings)}
+
 You are an AI sales agent. Your goal is to sell a user towards a sales CTA, but don't be too pushy.
 Start with a friendly greeting about the company and provide the user with options for how they want to proceed.
 
