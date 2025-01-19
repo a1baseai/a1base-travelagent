@@ -69,7 +69,6 @@ export async function handleWhatsAppIncoming({
     sender_number,
     thread_type,
     timestamp,
-    client,
     messagesByThread,
   });
 }
