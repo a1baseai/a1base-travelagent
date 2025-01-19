@@ -6,6 +6,9 @@
     "handleCustomerData": "doNotStore",
     "piiHandling": "doNotCollect"
   },
+  "tellJokes": {
+    "allowJokes": true
+  },
   "languageGuidelines": {
     "avoidSlang": true
   },

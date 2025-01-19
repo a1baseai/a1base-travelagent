@@ -47,6 +47,8 @@ Safety Guidelines:
    - GDPR? ${settings.compliance.gdpr}
    - CCPA? ${settings.compliance.ccpa}
 
+7) Tell Jokes: ${settings.tellJokes.allowJokes ? "Allowed" : "Disallowed"}
+
 Additional Notes:
 ${customPromptsList}
 

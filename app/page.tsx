@@ -16,6 +16,15 @@ export default function Home() {
           Template A1 Agent that can communicate across WhatsApp, Email, Slack, Teams, and SMS.
         </p>
 
+        <a
+          href={`https://wa.me/${process.env.A1BASE_AGENT_NUMBER?.replace('+', '')}`}
+          target="_blank"
+          rel="noopener noreferrer" 
+          className="rounded-lg px-6 py-3 bg-[#25D366] hover:bg-[#128C7E] text-white flex items-center gap-2 transition-colors"
+        >
+          Chat with your agent on WhatApp
+        </a>
+
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full max-w-4xl">
           <div className="p-6 rounded-xl bg-white dark:bg-black/20 border border-black/[.08] dark:border-white/[.08] shadow-lg">
             <h2 className="text-xl font-semibold mb-4">Create your A1Base Account</h2>
@@ -32,32 +41,8 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="p-6 rounded-xl bg-white dark:bg-black/20 border border-black/[.08] dark:border-white/[.08] shadow-lg">
-            <h2 className="text-xl font-semibold mb-4">Chat with your A1Agent</h2>
-            <div className="flex flex-col gap-3">
-              
-              <a
-                href="#"
-                className="rounded-lg px-4 py-2 bg-green-500 hover:bg-green-600 text-white flex items-center gap-2 transition-colors"
-              >
-                WhatsApp
-              </a>
-              <a
-                href="#"
-                className="rounded-lg px-4 py-2 bg-red-500 hover:bg-red-600 text-white flex items-center gap-2 transition-colors"
-              >
-                Email
-              </a>
-              <a
-                href="#"
-                className="rounded-lg px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white flex items-center gap-2 transition-colors"
-              >
-                Slack
-              </a>
-            </div>
-          </div>
 
-          <div className="p-6 rounded-xl bg-white dark:bg-black/20 border border-black/[.08] dark:border-white/[.08] shadow-lg">
+          <div className="p-6 rounded-xl bg-white dark:bg-black/20 border border-black/[.08] dark:border-white/[.08] shadow-lg col-span-2">
             <h2 className="text-xl font-semibold mb-4">Getting Started</h2>
             <ol className="list-inside list-decimal text-sm space-y-3 font-[family-name:var(--font-geist-mono)]">
               <li>Update your env variables</li>
