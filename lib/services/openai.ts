@@ -95,14 +95,7 @@ export async function generateEmailFromThread(
   const completion = await openai.chat.completions.create({
     model: "gpt-4",
     messages: [
-      {
-        role: "system",
-        content: `You are a professional email composer. Generate a subject line and email body based on the conversation context provided. 
-        The email should be professional but maintain a conversational tone. 
-        Format your response exactly as follows:
-        SUBJECT: <subject line>
-        BODY: <email body>`,
-      },
+      { role: "system", content: SYSTEM_PROMPTS.EMAIL_COMPOSITION },
       ...relevantMessages,
     ],
   });

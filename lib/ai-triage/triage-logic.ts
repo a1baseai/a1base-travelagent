@@ -1,6 +1,7 @@
 import { generateAgentResponse } from "../services/openai";
 import { ThreadMessage } from "@/types/chat";
-import { DefaultReplyToMessage } from "../workflows/basic_workflow";
+import { DefaultReplyToMessage, SendEmailFromAgent } from "../workflows/basic_workflow";
+import { triageMessageIntent } from "../services/openai";
 
 type MessageRecord = {
   message_id: string;
@@ -43,13 +44,31 @@ export async function triageMessage({
       message_id: msg.message_id
     }));
 
-    // Pass to DefaultResponse workflow
-    await DefaultReplyToMessage(
-      messages,
-      thread_type as "individual" | "group",
-      thread_id,
-      sender_number
-    );
+    // Triage message intent
+    const triage = await triageMessageIntent(messages);
+    
+    // Based on the triage result, choose the appropriate workflow
+    switch (triage.responseType) {
+      case 'generateEmail':
+        // Triage to send an email using the agent's email address
+        // TODO: case where an email isn't mentioned in the message
+        await SendEmailFromAgent(threadMessages)
+        
+      case 'followUpResponse':
+        // Triage to ask a follow up question
+        
+        break;
+        
+      case 'simpleResponse':
+      default:
+        // Use the default workflow
+        await DefaultReplyToMessage(
+          messages,
+          thread_type as "individual" | "group",
+          thread_id,
+          sender_number
+        );
+    }
   } catch (error) {
     console.error("[Triage] Error:", error);
     throw error;

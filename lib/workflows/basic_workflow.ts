@@ -1,5 +1,5 @@
 import { A1BaseAPI } from "a1base-node";
-import { generateAgentResponse } from "../services/openai";
+import { generateAgentResponse, generateEmailFromThread } from "../services/openai";
 import { ThreadMessage } from "@/types/chat";
 
 // Initialize A1Base client
@@ -74,5 +74,35 @@ export async function DefaultReplyToMessage(
   }
 }
 
-
 // SAVE DATA FLOW
+
+// SEND EMAIL FLOW
+export async function SendEmailFromAgent(threadMessages: ThreadMessage[]) {
+    try {
+      // Generate email content from thread
+      const emailContent = await generateEmailFromThread(threadMessages);
+
+      const response = await fetch('/api/email/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to: emailContent.recipientEmail,
+          from: process.env.AGENT_EMAIL_ADDRESS!,
+          subject: 'Message from AI Agent',
+          text: emailContent,
+          html: `<p>${emailContent}</p>`
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Failed to send email: ${response.statusText}`);
+      }
+  
+      return await response.json();
+    } catch (error) {
+      console.error('[sendEmailFromAgent] Error:', error);
+      throw error;
+    }
+}
