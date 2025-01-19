@@ -75,24 +75,25 @@ export async function DefaultReplyToMessage(
   }
 }
 
-// SEND EMAIL FLOW
+// SEND EMAIL 
+// Construct and send an email from the A1_Agent_Email to a email specified in the message
 export async function SendEmailFromAgent(threadMessages: ThreadMessage[]) {
   try {
-    // Use the 'email_generation' prompt
+    // Generate email contents
     const emailData = await generateEmailFromThread(threadMessages, basicWorkflowsPrompt.email_generation.user);
 
     if (!emailData.emailContent) {
       throw new Error("Email content could not be generated.");
     }
-
-    // TODO: update this once send_email is added to the npm package
+    
     const response = await client.sendEmailMessage(process.env.A1BASE_ACCOUNT_ID!, {
       sender_address: process.env.A1BASE_AGENT_EMAIL!,
       recipient_address: emailData.recipientEmail,
       subject: emailData.emailContent.subject,
       body: emailData.emailContent.body,
       headers: {
-        // Optional headers can be added here if needed
+        // Optional headers
+        // TODO: Add example with custom headers
       }
     });
 
