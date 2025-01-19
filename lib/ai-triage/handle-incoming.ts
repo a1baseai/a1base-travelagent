@@ -4,8 +4,10 @@ import { triageMessage } from "./triage-logic";
 
 // Initialize A1Base client
 const client = new A1BaseAPI({
-  apiKey: process.env.A1BASE_API_KEY!,
-  apiSecret: process.env.A1BASE_API_SECRET!,
+  credentials: {
+    apiKey: process.env.A1BASE_API_KEY!,
+    apiSecret: process.env.A1BASE_API_SECRET!,
+  }
 });
 
 // In-memory storage (Note: This will reset on server restart)

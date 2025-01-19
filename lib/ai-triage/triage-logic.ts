@@ -1,5 +1,6 @@
 import { generateAgentResponse } from "../services/openai";
-import { A1BaseAPI } from "a1base-node";
+import { ThreadMessage } from "@/types/chat";
+import { DefaultReplyToMessage } from "../workflows/basic_workflow";
 
 type MessageRecord = {
   message_id: string;
@@ -17,68 +18,40 @@ type TriageParams = {
   sender_number: string;
   thread_type: string;
   timestamp: string;
-  client: A1BaseAPI;
   messagesByThread: Map<string, MessageRecord[]>;
 };
 
 export async function triageMessage({
   thread_id,
-  message_id,
   content,
   sender_name,
   sender_number,
   thread_type,
-  timestamp,
-  client,
   messagesByThread,
 }: TriageParams) {
   try {
     const threadMessages = messagesByThread.get(thread_id) || [];
-    console.log("[Thread Messages]", threadMessages);
+    
+    // Convert to ThreadMessage format
+    const messages: ThreadMessage[] = threadMessages.map(msg => ({
+      content: msg.content,
+      sender_number: msg.sender_number,
+      sender_name: msg.sender_name,
+      thread_id,
+      thread_type,
+      timestamp: msg.timestamp,
+      message_id: msg.message_id
+    }));
 
-    const aiResponse = await generateAgentResponse(threadMessages);
-    console.log("[AI Response]", aiResponse);
-
-    // Shared message data
-    const messageData = {
-      content: aiResponse,
-      from: process.env.A1BASE_AGENT_NUMBER!,
-      service: "whatsapp",
-    };
-
-    // Send message using A1Base client
-    if (thread_type === "group") {
-      await client.sendGroupMessage(process.env.A1BASE_ACCOUNT_ID!, {
-        ...messageData,
-        thread_id: thread_id,
-      });
-    } else {
-      await client.sendIndividualMessage(process.env.A1BASE_ACCOUNT_ID!, {
-        ...messageData,
-        to: sender_number,
-      });
-    }
+    // Pass to DefaultResponse workflow
+    await DefaultReplyToMessage(
+      messages,
+      thread_type as "individual" | "group",
+      thread_id,
+      sender_number
+    );
   } catch (error) {
-    console.error("[Chat] Error:", error);
-
-    // Shared error message data
-    const errorMessageData = {
-      content: "Sorry, I encountered an error processing your message",
-      from: process.env.A1BASE_AGENT_NUMBER!,
-      service: "whatsapp",
-    };
-
-    // Send error message
-    if (thread_type === "group") {
-      await client.sendGroupMessage(process.env.A1BASE_ACCOUNT_ID!, {
-        ...errorMessageData,
-        thread_id: thread_id,
-      });
-    } else {
-      await client.sendIndividualMessage(process.env.A1BASE_ACCOUNT_ID!, {
-        ...errorMessageData,
-        to: sender_number,
-      });
-    }
+    console.error("[Triage] Error:", error);
+    throw error;
   }
 }
