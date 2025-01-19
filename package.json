@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "a1base-api": "^1.0.0",
     "a1base-node": "^0.0.36",
     "next": "^15.1.3",
     "openai": "^4.77.0",
