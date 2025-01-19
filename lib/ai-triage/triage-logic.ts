@@ -30,6 +30,8 @@ export async function triageMessage({
   thread_type,
   messagesByThread,
 }: TriageParams) {
+  console.log("[triageMessage] Starting message triage");
+
   try {
     const threadMessages = messagesByThread.get(thread_id) || [];
     
@@ -50,17 +52,20 @@ export async function triageMessage({
     // Based on the triage result, choose the appropriate workflow
     switch (triage.responseType) {
       case 'generateEmail':
+        console.log('Running Generate Email')
         // Triage to send an email using the agent's email address
         // TODO: case where an email isn't mentioned in the message
         await SendEmailFromAgent(threadMessages)
         
       case 'followUpResponse':
+        console.log('Running Follow Up Response')
         // Triage to ask a follow up question
         
         break;
         
       case 'simpleResponse':
       default:
+        console.log('Running Default Response')
         // Use the default workflow
         await DefaultReplyToMessage(
           messages,

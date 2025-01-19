@@ -1,6 +1,7 @@
 import { A1BaseAPI } from "a1base-node";
-import { generateAgentResponse, generateEmailFromThread } from "../services/openai";
+import { triageMessageIntent, generateAgentResponse, generateEmailFromThread } from "../services/openai";
 import { ThreadMessage } from "@/types/chat";
+import { basicWorkflowsPrompt } from "./basic_workflows_prompt";
 
 // Initialize A1Base client
 const client = new A1BaseAPI({
@@ -25,8 +26,8 @@ export async function DefaultReplyToMessage(
   });
 
   try {
-    // Generate AI response
-    const response = await generateAgentResponse(threadMessages);
+    // Use the 'simple_response' prompt
+    const response = await generateAgentResponse(threadMessages, basicWorkflowsPrompt.simple_response.user);
 
     // Prepare message data
     const messageData = {
@@ -74,35 +75,30 @@ export async function DefaultReplyToMessage(
   }
 }
 
-// SAVE DATA FLOW
-
 // SEND EMAIL FLOW
 export async function SendEmailFromAgent(threadMessages: ThreadMessage[]) {
-    try {
-      // Generate email content from thread
-      const emailContent = await generateEmailFromThread(threadMessages);
+  try {
+    // Use the 'email_generation' prompt
+    const emailData = await generateEmailFromThread(threadMessages, basicWorkflowsPrompt.email_generation.user);
 
-      const response = await fetch('/api/email/send', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          to: emailContent.recipientEmail,
-          from: process.env.AGENT_EMAIL_ADDRESS!,
-          subject: 'Message from AI Agent',
-          text: emailContent,
-          html: `<p>${emailContent}</p>`
-        }),
-      });
-  
-      if (!response.ok) {
-        throw new Error(`Failed to send email: ${response.statusText}`);
-      }
-  
-      return await response.json();
-    } catch (error) {
-      console.error('[sendEmailFromAgent] Error:', error);
-      throw error;
+    if (!emailData.emailContent) {
+      throw new Error("Email content could not be generated.");
     }
+
+    // TODO: update this once send_email is added to the npm package
+    const response = await client.sendEmailMessage(process.env.A1BASE_ACCOUNT_ID!, {
+      sender_address: process.env.A1BASE_AGENT_EMAIL!,
+      recipient_address: emailData.recipientEmail,
+      subject: emailData.emailContent.subject,
+      body: emailData.emailContent.body,
+      headers: {
+        // Optional headers can be added here if needed
+      }
+    });
+
+    return response;
+  } catch (error) {
+    console.error('[SendEmailFromAgent] Error:', error);
+    throw error;
+  }
 }
