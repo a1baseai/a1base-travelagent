@@ -48,6 +48,7 @@ export async function triageMessage({
 
     // Triage message intent
     const triage = await triageMessageIntent(messages);
+    console.log("[triageMessage] Triage result:", triage);
     
     // Based on the triage result, choose the appropriate workflow
     switch (triage.responseType) {

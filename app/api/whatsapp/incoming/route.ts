@@ -48,7 +48,8 @@ export async function POST(request: Request) {
       sender_number: body.sender_number,
       sender_name: body.sender_name,
       timestamp: body.timestamp,
-      a1_account_id: body.a1_account_id
+      a1_account_id: body.a1_account_id,
+      service: "whatsapp",
     };
 
     await handleWhatsAppIncoming(whatsappData);

@@ -32,32 +32,42 @@ A professional, production-ready template for building AI-powered chat agents us
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/yourusername/a1base-ai-agent
    cd a1base-ai-agent
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Configure environment**
+
    ```bash
    cp .env.example .env.local
    ```
-   
+
    Update `.env.local` with your credentials:
+
    ```env
-   A1BASE_API_KEY=your_api_key            # From A1Base Dashboard
-   A1BASE_API_SECRET=your_api_secret      # From A1Base Dashboard
-   A1BASE_ACCOUNT_ID=your_account_id      # From A1Base Dashboard
-   A1BASE_AGENT_NUMBER=your_agent_number  # From A1Base Dashboard
-   A1BASE_AGENT_NAME=your_agent_name      # From A1Base Dashboard
-   OPENAI_API_KEY=your_openai_key      # From OpenAI Dashboard
+
+   A1BASE_API_KEY=your_api_key            # From A1Base Dashboard 
+   A1BASE_API_SECRET=your_api_secret      # From A1Base Dashboard 
+   A1BASE_ACCOUNT_ID=your_account_id      # From A1Base Dashboard 
+   A1BASE_AGENT_NUMBER=your_agent_number  # From A1Base Dashboard 
+   A1BASE_AGENT_NAME=your_agent_name      # From A1Base Dashboard 
+   A1BASE_AGENT_EMAIL=email@a1send.com    # From A1Base Dashboard
+   OPENAI_API_KEY=your_openai_key         # From OpenAI Dashboard
+   CRON_SECRET=your_generated_secret      # Generate your own secure random string
+
+
    ```
 
 4. **Set up A1Base credentials**
+
    - Register at [A1Base Dashboard](https://dashboard.a1base.com)
    - Access Settings > API Keys for credentials
    - Locate Account ID in Dashboard overview
@@ -75,11 +85,13 @@ Your agent will be available at `http://localhost:3000`
 ### Setting up Message Reception
 
 1. **Expose Local Server**
+
    ```bash
    ngrok http 3000
    ```
 
 2. **Configure A1Base Webhook**
+
    - Navigate to Settings > Webhooks in A1Base Dashboard
    - Set Webhook URL: `https://your-ngrok-url/api/whatsapp/incoming`
    - Save configuration
@@ -91,14 +103,16 @@ Your agent will be available at `http://localhost:3000`
 
 ## 🔑 Environment Variables
 
-| Variable | Purpose | Source |
-|----------|---------|--------|
-| `A1BASE_API_KEY` | API Authentication | A1Base Dashboard > Settings > API Keys |
-| `A1BASE_API_SECRET` | API Security | A1Base Dashboard > Settings > API Keys |
-| `A1BASE_ACCOUNT_ID` | Account Identification | A1Base Dashboard > Overview |
-| `A1BASE_AGENT_NUMBER` | Agent Number | A1Base Dashboard > Overview |
-| `A1BASE_AGENT_NAME` | Agent Name | A1Base Dashboard > Overview |
-| `OPENAI_API_KEY` | AI Integration | [OpenAI Dashboard](https://platform.openai.com/api-keys) |
+| Variable              | Purpose                | Source                                                   |
+| --------------------- | ---------------------- | -------------------------------------------------------- |
+| `A1BASE_API_KEY`      | API Authentication     | A1Base Dashboard                                         |
+| `A1BASE_API_SECRET`   | API Security           | A1Base Dashboard                                         |
+| `A1BASE_ACCOUNT_ID`   | Account Identification | A1Base Dashboard                                         |
+| `A1BASE_AGENT_NUMBER` | Agent Number           | A1Base Dashboard                                         |
+| `A1BASE_AGENT_NAME`   | Agent Name             | A1Base Dashboard                                         |
+| `A1BASE_AGENT_EMAIL`  | Agent Email            | A1Base Dashboard                                         |
+| `OPENAI_API_KEY`      | AI Integration         | [OpenAI Dashboard](https://platform.openai.com/api-keys) |
+| `CRON_SECRET`         | Cron Job Security      | Self-generated secure random string                      |
 
 ## 🛠️ Customization
 
