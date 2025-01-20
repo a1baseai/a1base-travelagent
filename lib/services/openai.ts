@@ -1,6 +1,6 @@
 import { ThreadMessage } from '@/types/chat'
 import OpenAI from 'openai'
-import { getSystemPrompt } from '../agent/prompts'
+import { getSystemPrompt } from '../agent/system-prompt'
 import { basicWorkflowsPrompt } from '../workflows/basic_workflows_prompt'
 
 const openai = new OpenAI({
