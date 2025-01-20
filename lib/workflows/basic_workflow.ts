@@ -176,12 +176,16 @@ export async function ConstructEmail(threadMessages: ThreadMessage[]): Promise<{
       message_count: threadMessages.length
     });
     // Generate email contents
-    const emailData = await generateEmailFromThread(threadMessages, basicWorkflowsPrompt.email_generation.user);
+    const emailData = await generateEmailFromThread(
+      threadMessages,
+      basicWorkflowsPrompt.email_generation.user
+    );
+        
+    console.log('=== Email Data ====')
     console.log(emailData)
     if (!emailData.emailContent) {
         throw new Error("Email content could not be generated.");
     }
-
     return {
         recipientEmail: emailData.recipientEmail,
         hasRecipient: emailData.hasRecipient,
@@ -194,13 +198,18 @@ export async function ConstructEmail(threadMessages: ThreadMessage[]): Promise<{
 }
 
 // Uses the A1Base sendEmailMessage function to send an email as the a1 agent email address set in .env.local
-export async function SendEmailFromAgent(emailData: {
+export async function SendEmailFromAgent(
+  emailData: {
     recipientEmail: string;
     emailContent: {
       subject: string;
       body: string;
     };
-  }) {
+  },
+  thread_type: "individual" | "group",
+  thread_id?: string,
+  sender_number?: string
+) {
   console.log("Workflow Start: [SendEmailFromAgent]", {
     recipient: emailData.recipientEmail,
     subject: emailData.emailContent.subject    
@@ -216,6 +225,25 @@ export async function SendEmailFromAgent(emailData: {
         // TODO: Add example with custom headers
       }
     });
+
+    // Send confirmation message to user
+    const confirmationMessage = {
+      content: `Email sent successfully!\nSubject: ${emailData.emailContent.subject}\nTo: ${emailData.recipientEmail}`,
+      from: process.env.A1BASE_AGENT_NUMBER!,
+      service: "whatsapp" as const
+    };
+
+    if (thread_type === "group" && thread_id) {
+      await client.sendGroupMessage(process.env.A1BASE_ACCOUNT_ID!, {
+        ...confirmationMessage,
+        thread_id
+      });
+    } else if (thread_type === "individual" && sender_number) {
+      await client.sendIndividualMessage(process.env.A1BASE_ACCOUNT_ID!, {
+        ...confirmationMessage,
+        to: sender_number
+      });
+    }
 
     return response;
   } catch (error) {
@@ -270,7 +298,7 @@ export async function ConfirmTaskCompletion(
   });
 
   try {
-    // Generate AI response confirming task completion
+    
     const confirmationMessage = await generateAgentResponse(
         threadMessages,
         basicWorkflowsPrompt.task_confirmation.user

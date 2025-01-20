@@ -85,11 +85,16 @@ export async function triageMessage({
         // Triage to send an email using the agent's email address
         
         const emailDraft = await ConstructEmail(threadMessages)
-                
-        // Confirm email contents with user or ask for follow up
-        await taskActionConfirmation(threadMessages, emailDraft)
-        
-        // await SendEmailFromAgent(threadMessages)
+              
+        // Get user confirmation and send email
+        // const confirmedEmail = await taskActionConfirmation(threadMessages, emailDraft);
+       
+        await SendEmailFromAgent(
+          emailDraft, 
+          thread_type as "individual" | "group", 
+          thread_id, 
+          sender_number
+        );
 
         // Send confirmation message back to user
         await ConfirmTaskCompletion(
@@ -100,16 +105,16 @@ export async function triageMessage({
         );
         break;
 
-      case 'taskActionConfirmation':
-        console.log('Running Task Confirmation Workflow')
-        // Confirm completion of a specific task
-        await ConfirmTaskCompletion(
-          messages,
-          thread_type as "individual" | "group",
-          thread_id,
-          sender_number
-        );
-        break;
+      // case 'taskActionConfirmation':
+      //   console.log('Running Task Confirmation Workflow')
+      //   // Confirm completion of a specific task
+      //   await ConfirmTaskCompletion(
+      //     messages,
+      //     thread_type as "individual" | "group",
+      //     thread_id,
+      //     sender_number
+      //   );
+      //   break;
         
       case 'followUpResponse':
         console.log('Running Follow Up Response')

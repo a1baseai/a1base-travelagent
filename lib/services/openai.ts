@@ -174,6 +174,8 @@ export async function generateEmailFromThread(threadMessages: ThreadMessage[], u
     body: string;
   } | null;
 }> {
+
+  console.log("OPENAI CALL TO MAKE EMAIL")
   // Extract email from last message
   const lastMessage = threadMessages[threadMessages.length - 1];
   let recipientEmail = "";  // Define this variable
@@ -187,34 +189,34 @@ export async function generateEmailFromThread(threadMessages: ThreadMessage[], u
   }));
 
   // Build conversation
-  const conversation = [{
-    role: "system" as const,
-    content: typeof basicWorkflowsPrompt.email_generation === 'string' ? 
-      basicWorkflowsPrompt.email_generation : 
-      basicWorkflowsPrompt.email_generation.user
-  }];
-
-  // Add user prompt if provided
+  const conversation: OpenAI.Chat.ChatCompletionMessageParam[] = [
+    { 
+      role: "system",
+      content: basicWorkflowsPrompt.email_generation.user 
+    }
+  ];
+  
+  // If there's a user-level prompt, add it
   if (userPrompt) {
-    conversation.push({ 
-      role: "user" as const, 
-      content: userPrompt 
-    });
+    conversation.push({ role: "user", content: userPrompt });
   }
-
-  // Add conversation context
+  
+  // Add the last few relevant messages
   conversation.push(...relevantMessages);
 
+  // Call OpenAI
   const completion = await openai.chat.completions.create({
     model: "gpt-4",
     messages: conversation,
   });
 
   const response = completion.choices[0].message?.content;
-  
+  console.log('OPENAI RESPONSE')
+  console.log(response)
+
   if (!response) {
     return {
-      recipientEmail,
+      recipientEmail: "",
       hasRecipient: false,
       emailContent: null
     };
@@ -225,8 +227,8 @@ export async function generateEmailFromThread(threadMessages: ThreadMessage[], u
   const bodyMatch = response.match(/BODY:\s*([\s\S]*)/);
 
   return {
-    recipientEmail,
-    hasRecipient: true,
+    recipientEmail: "",  // This will be handled by the OpenAI call later
+    hasRecipient: false, // This should be false by default since we're not handling recipient extraction here
     emailContent: {
       subject: subjectMatch?.[1]?.trim() || "No subject",
       body: bodyMatch?.[1]?.trim() || "No body content",
