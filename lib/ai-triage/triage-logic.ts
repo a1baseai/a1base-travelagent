@@ -1,7 +1,16 @@
-import { generateAgentResponse } from "../services/openai";
 import { ThreadMessage } from "@/types/chat";
-import { DefaultReplyToMessage, SendEmailFromAgent, ConfirmTaskCompletion, ConstructEmail, waitForUserApproval } from "../workflows/basic_workflow";
-import { triageMessageIntent } from "../services/openai";
+import { 
+  DefaultReplyToMessage,
+  SendEmailFromAgent, 
+  ConfirmTaskCompletion,
+  ConstructEmail,
+  taskActionConfirmation,
+  verifyAgentIdentity
+} from "../workflows/basic_workflow";
+import { 
+  generateAgentResponse,
+  triageMessageIntent 
+} from "../services/openai";
 
 type MessageRecord = {
   message_id: string;
@@ -22,6 +31,13 @@ type TriageParams = {
   messagesByThread: Map<string, MessageRecord[]>;
 };
 
+// ======================== MAIN TRIAGE LOGIC ========================
+// Processes incoming messages and routes them to appropriate workflows
+// in basic_workflow.ts. Currently triages for:
+// - Simple response to one off message
+// - Sharing A1 Agent Identity card
+// - Drafting and sending an email
+// ===================================================================
 export async function triageMessage({
   thread_id,
   content,
@@ -46,20 +62,32 @@ export async function triageMessage({
       message_id: msg.message_id
     }));
 
-    // Triage message intent
-    const triage = await triageMessageIntent(messages);
-    console.log("[triageMessage] Triage result:", triage);
     
+    const triage = await triageMessageIntent(messages);
     // Based on the triage result, choose the appropriate workflow
+    
     switch (triage.responseType) {
+      case 'sendIdentityCard':
+        console.log('Running Identity Verification Workflow')
+      
+        await verifyAgentIdentity(
+          threadMessages[threadMessages.length - 1].content,
+          thread_type as "individual" | "group",
+          thread_id,
+          sender_number
+        )
+        
+
+      break;
+
       case 'handleEmailAction':
-        console.log('Running Generate Email')
+        console.log('Running Email Workflow')
         // Triage to send an email using the agent's email address
         
-        // Confirm email contents with user or ask for follow up
         const emailDraft = await ConstructEmail(threadMessages)
-
-        // await waitForUserApproval(threadMessages, emailDraft)
+                
+        // Confirm email contents with user or ask for follow up
+        await taskActionConfirmation(threadMessages, emailDraft)
         
         // await SendEmailFromAgent(threadMessages)
 
@@ -67,6 +95,17 @@ export async function triageMessage({
         await ConfirmTaskCompletion(
           messages,
           thread_type as "individual" | "group", 
+          thread_id,
+          sender_number
+        );
+        break;
+
+      case 'taskActionConfirmation':
+        console.log('Running Task Confirmation Workflow')
+        // Confirm completion of a specific task
+        await ConfirmTaskCompletion(
+          messages,
+          thread_type as "individual" | "group",
           thread_id,
           sender_number
         );
