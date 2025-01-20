@@ -1,5 +1,25 @@
+/**
+ * Workflow functions for handling WhatsApp messages and coordinating responses 
+ * through the A1Base API.
+ * 
+ * Key workflow functions:
+ * - verifyAgentIdentity: Sends identity verification message
+ * - DefaultReplyToMessage: Generates and sends simple response  
+ * - ConstructEmail: Creates email draft from thread messages
+ * - SendEmailFromAgent: Sends composed email via agent
+ * - ConfirmTaskCompletion: Confirms task completion with user
+ * 
+ * Uses OpenAI for generating contextual responses.
+ * Handles both individual and group message threads.
+ */
+
 import { A1BaseAPI } from "a1base-node";
-import { triageMessageIntent, generateAgentResponse, generateEmailFromThread } from "../services/openai";
+import { 
+  triageMessageIntent,
+  generateAgentResponse, 
+  generateEmailFromThread,
+  generateAgentIntroduction,
+} from "../services/openai";
 import { ThreadMessage } from "@/types/chat";
 import { basicWorkflowsPrompt } from "./basic_workflows_prompt";
 
@@ -11,16 +31,78 @@ const client = new A1BaseAPI({
   }
 });
 
-// DEFAULT: SEND SIMPLE RESPONSE TO USER
+
+
+// ====== BASIC SEND AND VERIFICATION WORKFLOW =======
+// Functions for sending messages and verifying agent identity
+// - verifyAgentIdentity: Sends identity verification message
+// - DefaultReplyToMessage: Generates and sends simple response
+// ===================================================
+
+export async function verifyAgentIdentity(
+  message: string,
+  thread_type: "individual" | "group",
+  thread_id?: string,
+  sender_number?: string
+) {
+  console.log("Workflow Start [verifyAgentIdentity]");
+
+  const agentIdCard = 'https://www.a1base.com/identity-and-trust/8661d846-d43d-4ee7-a095-0dcc97764b97'
+
+  try {
+    
+    // Generate response message for identity verification
+    const response = await generateAgentIntroduction(message);
+
+    // Prepare message data with response and ID card link
+    const messageData = {
+      content: `${response}\n\nHere's my A1Base identity card for verification:`,
+      from: process.env.A1BASE_AGENT_NUMBER!,
+      service: "whatsapp" as const,
+    };
+
+    // Send initial message using A1Base client
+    if (thread_type === "group" && thread_id) {
+      await client.sendGroupMessage(process.env.A1BASE_ACCOUNT_ID!, {
+        ...messageData,
+        thread_id,
+      });
+      // Send identity card link
+      await client.sendGroupMessage(process.env.A1BASE_ACCOUNT_ID!, {
+        content: agentIdCard,
+        from: process.env.A1BASE_AGENT_NUMBER!,
+        service: "whatsapp",
+        thread_id,
+      });
+    } else if (thread_type === "individual" && sender_number) {
+      await client.sendIndividualMessage(process.env.A1BASE_ACCOUNT_ID!, {
+        ...messageData,
+        to: sender_number,
+      });
+      // Send identity card link
+      await client.sendIndividualMessage(process.env.A1BASE_ACCOUNT_ID!, {
+        content: agentIdCard,
+        from: process.env.A1BASE_AGENT_NUMBER!,
+        service: "whatsapp",
+        to: sender_number,
+      });
+    } else {
+      throw new Error("Invalid message type or missing required parameters");
+    }
+  } catch (error) {
+    console.error("[verifyAgentIdentity] Error:", error);
+    throw error;
+  }
+}
+
+
 export async function DefaultReplyToMessage(
   threadMessages: ThreadMessage[],
   thread_type: "individual" | "group",
   thread_id?: string,
   sender_number?: string
 ) {
-  console.log("[DefaultReplyToMessage] Running default response workflow", {
-    thread_type,
-    thread_id,
+  console.log("Workflow Start [DefaultReplyToMessage]", {
     sender_number,
     message_count: threadMessages.length
   });
@@ -81,51 +163,37 @@ export async function DefaultReplyToMessage(
 // message triage detects an email-related request from the user.
 // =======================================================================
 
-// GENERATE EMAIL CONTENT TO BE SENT BY THE A1 AGENT
-// ConstructEmail generates the contents of the email, but doesn't send it
-// until approved by user in 
+// Generates the contents of the email, but doesn't send it until user approval
 export async function ConstructEmail(threadMessages: ThreadMessage[]): Promise<{
   recipientEmail: string;
+  hasRecipient: boolean;
   emailContent: {
     subject: string;
     body: string;
   };
 }> {
+    console.log("Workflow Start [ConstructEmail]", {
+      message_count: threadMessages.length
+    });
     // Generate email contents
     const emailData = await generateEmailFromThread(threadMessages, basicWorkflowsPrompt.email_generation.user);
-
+    console.log(emailData)
     if (!emailData.emailContent) {
         throw new Error("Email content could not be generated.");
     }
 
     return {
         recipientEmail: emailData.recipientEmail,
-        emailContent: emailData.emailContent
+        hasRecipient: emailData.hasRecipient,
+        emailContent: {
+          subject: emailData.emailContent.subject,
+          body: emailData.emailContent.body
+        }
+        
     };
 }
 
-//
-export async function waitForUserApproval(threadMessages: ThreadMessage[]): Promise<{
-    recipientEmail: string;
-    emailContent: {
-      subject: string;
-      body: string;
-    };
-}> {
-    // Generate email contents
-    const emailData = await generateEmailFromThread(threadMessages, basicWorkflowsPrompt.email_generation.user);
-
-    if (!emailData.emailContent) {
-        throw new Error("Email content could not be generated.");
-    }
-
-    return {
-        recipientEmail: emailData.recipientEmail,
-        emailContent: emailData.emailContent
-    };
-}
-
-// SEND EMAIL AS A1 AGENT TO THE RECIPIENT SPECIFIED IN THE MESSAGE
+// Uses the A1Base sendEmailMessage function to send an email as the a1 agent email address set in .env.local
 export async function SendEmailFromAgent(emailData: {
     recipientEmail: string;
     emailContent: {
@@ -133,8 +201,11 @@ export async function SendEmailFromAgent(emailData: {
       body: string;
     };
   }) {
+  console.log("Workflow Start: [SendEmailFromAgent]", {
+    recipient: emailData.recipientEmail,
+    subject: emailData.emailContent.subject    
+  });
   try {
-    
     const response = await client.sendEmailMessage(process.env.A1BASE_ACCOUNT_ID!, {
       sender_address: process.env.A1BASE_AGENT_EMAIL!,
       recipient_address: emailData.recipientEmail,
@@ -153,17 +224,45 @@ export async function SendEmailFromAgent(emailData: {
   }
 }
 
-// CONFIRM TASK COMPLETION WITH USER
-// This function sends a confirmation message back to the user after completing a task
-// It helps maintain a human-in-the-loop feedback cycle by explicitly confirming 
-// that their request was handled and giving them an opportunity to follow up if needed
+
+// ===================== TASK APPROVAL WORKFLOWS =======================
+// Workflows requiring explicit user approval before executing tasks.
+// Shows task details, waits for approval, executes if approved,
+// then confirms completion or cancellation.
+// =====================================================================
+
+// Generate and send message to user to confirm before proceeding with task
+export async function taskActionConfirmation(threadMessages: ThreadMessage[], emailDraft: {
+    recipientEmail: string;
+    emailContent: {
+      subject: string;
+      body: string;
+    };
+}): Promise<{
+    recipientEmail: string;
+    emailContent: {
+      subject: string;
+      body: string;
+    };
+}> {
+    console.log("starting [taskActionConfirmation] workflow", {
+      message_count: threadMessages.length,
+      recipient: emailDraft.recipientEmail,
+      subject: emailDraft.emailContent.subject
+    });
+    // For now, just return the draft email as-is
+    // TODO: Implement actual user approval flow
+    return emailDraft;
+}
+
+// Sends confirmation message to user after task completion to maintain feedback loop
 export async function ConfirmTaskCompletion(
   threadMessages: ThreadMessage[],
   thread_type: "individual" | "group",
   thread_id?: string,
   sender_number?: string
 ) {
-  console.log("[ConfirmTaskCompletion] Confirming task completion", {
+  console.log("starting [ConfirmTaskCompletion] workflow", {
     thread_type,
     thread_id,
     sender_number,
@@ -171,9 +270,11 @@ export async function ConfirmTaskCompletion(
   });
 
   try {
-    // You can optionally use an AI-generated response using generateAgentResponse
-    // For now, we'll keep it a simple fixed message
-    const confirmationMessage = "Great news! Your request has been successfully completed. Let us know if you need anything else.";
+    // Generate AI response confirming task completion
+    const confirmationMessage = await generateAgentResponse(
+        threadMessages,
+        basicWorkflowsPrompt.task_confirmation.user
+    );
 
     // Prepare message data
     const messageData = {

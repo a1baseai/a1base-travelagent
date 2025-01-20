@@ -10,7 +10,9 @@ const client = new A1BaseAPI({
   }
 });
 
-// In-memory storage (Note: This will reset on server restart)
+// IN-MEMORY STORAGE FOR DEMO
+// (Note: This will reset on server restart)
+// Please implement a more permanent data store for any projects
 const messagesByThread = new Map();
 
 function saveMessage(
