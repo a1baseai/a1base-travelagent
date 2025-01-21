@@ -34,8 +34,8 @@ A professional, production-ready template for building AI-powered chat agents us
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/yourusername/a1base-ai-agent
-   cd a1base-ai-agent
+   git clone https://github.com/yourusername/realty
+   cd realty
    ```
 
 2. **Install dependencies**
@@ -131,7 +131,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 💬 Support
 
 - **A1Base Integration**: [Documentation](https://docs.a1base.com)
-- **Template Issues**: [GitHub Issues](https://github.com/yourusername/a1base-ai-agent/issues)
+- **Template Issues**: [GitHub Issues](https://github.com/yourusername/realty/issues)
 - **General Inquiries**: [A1Base Support](https://a1base.com/support)
 
 ---

@@ -36,13 +36,13 @@ export async function triageMessageIntent(threadMessages: ThreadMessage[]): Prom
 Based on the conversation, analyze the user's intent and respond with exactly one of these JSON responses:
 {"responseType":"sendIdentityCard"}
 {"responseType":"simpleResponse"}
-{"responseType":"followUpResponse"}
+// {"responseType":"followUpResponse"}
 {"responseType":"handleEmailAction"} 
 {"responseType":"taskActionConfirmation"}
 
 Rules:
 - If the user specifically requests an email to be written or sent, or includes an email address, select "handleEmailAction"
-- If the user asks a question, or requires an email to be written but didn't a recipient address, select "followUpResponse"
+// - If the user asks a question, or requires an email to be written but didn't a recipient address, select "followUpResponse"
 - If the user is providing a response to a previous message in the thread, select "taskActionConfirmation"
 - If the user is requesting some sort of identification i.e 'who are you', select "sendIdentityCard"
 - Otherwise, select "simpleResponse"
@@ -68,7 +68,7 @@ Return valid JSON with only that single key "responseType" and value as one of t
     const validTypes = [
       "sendIdentityCard",
       "simpleResponse",
-      "followUpResponse",
+      // "followUpResponse",
       "handleEmailAction", 
       "taskActionConfirmation",
     ];

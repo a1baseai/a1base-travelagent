@@ -116,11 +116,11 @@ export async function triageMessage({
       //   );
       //   break;
         
-      case 'followUpResponse':
-        console.log('Running Follow Up Response')
-        // Triage to ask a follow up question
+      // case 'followUpResponse':
+      //   console.log('Running Follow Up Response')
+      //   // Triage to ask a follow up question
         
-        break;
+      //   break;
         
       case 'simpleResponse':
       default:
