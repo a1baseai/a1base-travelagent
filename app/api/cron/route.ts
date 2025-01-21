@@ -51,6 +51,15 @@ export async function POST(request: Request) {
   }
 
   try {
+    // Validate request body if provided
+    const body = await request.json().catch(() => ({}));
+    
+    // Log the cron job trigger with any provided metadata
+    console.log('Cron job triggered:', { 
+      timestamp: new Date().toISOString(),
+      metadata: body 
+    });
+
     // Add your AI agent cron job logic here
     // For example:
     // await generateDailyAgentReport();

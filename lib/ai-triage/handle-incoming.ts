@@ -1,14 +1,5 @@
-import { A1BaseAPI, WhatsAppIncomingData } from "a1base-node";
-import { generateAgentResponse } from "../services/openai";
+import { WhatsAppIncomingData } from "a1base-node";
 import { triageMessage } from "./triage-logic";
-
-// Initialize A1Base client
-const client = new A1BaseAPI({
-  credentials: {
-    apiKey: process.env.A1BASE_API_KEY!,
-    apiSecret: process.env.A1BASE_API_SECRET!,
-  }
-});
 
 // IN-MEMORY STORAGE FOR DEMO
 // (Note: This will reset on server restart)

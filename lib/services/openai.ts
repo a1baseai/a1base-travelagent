@@ -26,9 +26,10 @@ export async function triageMessageIntent(threadMessages: ThreadMessage[]): Prom
   
 }> {
   // Convert thread messages to OpenAI chat format
-  const conversationContext = threadMessages.map((msg) => ({
-    role: msg.sender_number === process.env.A1BASE_AGENT_NUMBER! ? "assistant" as const : "user" as const,
+  const conversationContext = threadMessages.map((msg): OpenAI.Chat.ChatCompletionMessageParam => ({
+    role: msg.sender_number === process.env.A1BASE_AGENT_NUMBER! ? "assistant" : "user",
     content: msg.content,
+    name: undefined
   }));
 
 
@@ -147,7 +148,7 @@ export async function generateAgentResponse(threadMessages: ThreadMessage[], use
 
   const completion = await openai.chat.completions.create({
     model: "gpt-4",
-    messages: conversation,
+    messages: conversation as OpenAI.Chat.ChatCompletionMessageParam[],
   });
 
   const content = completion.choices[0]?.message?.content || "Sorry, I couldn't generate a response";
@@ -157,7 +158,7 @@ export async function generateAgentResponse(threadMessages: ThreadMessage[], use
     const data = JSON.parse(content);
     return data.message || "No message found.";
   } catch (error) {
-    // If not valid JSON, just return the entire text
+    console.log(error)
     return content;
   }
 }
@@ -176,9 +177,8 @@ export async function generateEmailFromThread(threadMessages: ThreadMessage[], u
 }> {
 
   console.log("OPENAI CALL TO MAKE EMAIL")
-  // Extract email from last message
-  const lastMessage = threadMessages[threadMessages.length - 1];
-  let recipientEmail = "";  // Define this variable
+  
+  // const lastMessage = threadMessages[threadMessages.length - 1];
   
   // Grab conversation context
   const relevantMessages = threadMessages.slice(-3).map((msg) => ({
@@ -207,7 +207,7 @@ export async function generateEmailFromThread(threadMessages: ThreadMessage[], u
   // Call OpenAI
   const completion = await openai.chat.completions.create({
     model: "gpt-4",
-    messages: conversation,
+    messages: conversation as OpenAI.Chat.ChatCompletionMessageParam[],
   });
 
   const response = completion.choices[0].message?.content;

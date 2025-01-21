@@ -4,11 +4,11 @@ import {
   SendEmailFromAgent, 
   ConfirmTaskCompletion,
   ConstructEmail,
-  taskActionConfirmation,
+  // taskActionConfirmation,
   verifyAgentIdentity
 } from "../workflows/basic_workflow";
 import { 
-  generateAgentResponse,
+  // generateAgentResponse,
   triageMessageIntent 
 } from "../services/openai";
 
@@ -46,7 +46,7 @@ export async function triageMessage({
   thread_type,
   messagesByThread,
 }: TriageParams) {
-  console.log("[triageMessage] Starting message triage");
+  console.log('Triage message received:', { thread_id, content, sender_name, sender_number, thread_type });
 
   try {
     const threadMessages = messagesByThread.get(thread_id) || [];

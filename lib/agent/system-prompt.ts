@@ -87,6 +87,10 @@ export const getSystemPrompt = (userName: string) => `
 ${getAgentProfileSnippet(agentProfileSettings)}
 </YOUR PROFILE>
 
+<YOUR USER>
+${userName}
+</YOUR USER>
+
 <SAFETY>
 ${getSafetyPrompt(safetySettings)}
 </SAFETY>

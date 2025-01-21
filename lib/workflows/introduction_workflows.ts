@@ -2,7 +2,7 @@
 
 import { A1BaseAPI } from "a1base-node";
 import { generateAgentResponse } from "../services/openai";
-import { ThreadMessage } from "@/types/chat";
+// import { ThreadMessage } from "@/types/chat";
 
 // Initialize A1Base client
 const client = new A1BaseAPI({
@@ -22,7 +22,9 @@ export async function SendIntroductionMessage(
   console.log("[SendIntroductionMessage] Sending introduction message", {
     thread_type,
     thread_id,
-    sender_number
+    sender_number,
+    userName,
+
   });
 
   try {
